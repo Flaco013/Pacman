@@ -81,6 +81,9 @@
       walls.push(new Rectangle(1, 0, 499, 4, "BLUE"));
       walls.push(new Rectangle(1, 496, 499, 4, "BLUE"));
 
+      walls.push(new Rectangle(0, 435, 34, 2, "BLUE"));
+      walls.push(new Rectangle(470, 435, 34, 2, "BLUE"));
+
       //
       walls.push(new Rectangle(0, 180, 40, 4, "BLUE"));
       walls.push(new Rectangle(40, 180, 4, 20, "BLUE"));
@@ -99,11 +102,43 @@
       walls.push(new Rectangle(460, 270, 4, 30, "BLUE"));
       walls.push(new Rectangle(460, 270, 40, 4, "BLUE"));
 
-      //
+      // sqaure obstacles
+      walls.push(new Rectangle(250, 0, 4, 90, "BLUE"));
+      walls.push(new Rectangle(65, 70, 30, 30, "BLUE"));
+      walls.push(new Rectangle(155, 70, 30, 30, "BLUE"));
+      walls.push(new Rectangle(325, 70, 30, 30, "BLUE"));
+      walls.push(new Rectangle(415, 70, 30, 30, "BLUE"));
 
-      walls.push(new Rectangle(250, 0, 4, 40, "BLUE"));
-      walls.push(new Rectangle(70, 70, 30, 30, "BLUE"));
-      walls.push(new Rectangle(150, 70, 30, 30, "BLUE"));
+      //line obtacles
+      //LEFT TOP T
+      walls.push(new Rectangle(150, 150, 2, 120, "BLUE"));
+      walls.push(new Rectangle(150, 210, 50, 2, "BLUE"));
+
+      walls.push(new Rectangle(370, 150, 2, 120, "BLUE"));
+      walls.push(new Rectangle(310, 210, 60, 2, "BLUE"));
+
+      walls.push(new Rectangle(210, 150, 89, 2, "BLUE"));
+      walls.push(new Rectangle(250, 150, 2, 60, "BLUE"));
+
+      walls.push(new Rectangle(230, 310, 72, 2, "BLUE"));
+      walls.push(new Rectangle(230, 290, 2, 20, "BLUE"));
+      walls.push(new Rectangle(300, 290, 2, 20, "BLUE"));
+
+      walls.push(new Rectangle(210, 370, 86, 2, "BLUE"));
+      walls.push(new Rectangle(250, 370, 2, 60, "BLUE"));
+
+      //LEFT BOTTOM T
+      walls.push(new Rectangle(110, 435, 89, 2, "BLUE"));
+      walls.push(new Rectangle(150, 375, 2, 60, "BLUE"));
+      //RIGHT BOTTOM T
+      walls.push(new Rectangle(312, 430, 89, 2, "BLUE"));
+      walls.push(new Rectangle(353, 370, 2, 60, "BLUE"));
+
+      walls.push(new Rectangle(95, 330, 2, 40, "BLUE"));
+      walls.push(new Rectangle(65, 370, 32, 2, "BLUE"));
+
+      walls.push(new Rectangle(408, 330, 2, 40, "BLUE"));
+      walls.push(new Rectangle(408, 370, 32, 2, "BLUE"));
 
       window.requestAnimationFrame = (function () {
         return (
