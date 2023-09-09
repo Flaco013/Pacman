@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas
+      id="myCanvas"
+      width="500px"
+      height="500px"
+      style="border: 1px solid rgb(0, 0, 0)"
+    ></canvas>
+
+    <script>
+      var canvas = document.getElementById("myCanvas");
+      var ctx = canvas.getContext("2d");
+
+      var color = randomRgbColor();
+      var pintar = false;
+
+      var x = 225;
+      var y = 225;
+      dir = 0;
+      speed = 5;
+      var tx = 0;
+      var ty = 0;
+      var wx = 200;
+      var wy = 200;
+      let score = 0;
+      let walls = [];
+      let pause = false;
+      let image = new Image();
+      let image2 = new Image();
+      let sonido = new Audio();
+
+      image.src = "peter.png";
+      image2.src = "BeerBottle.png";
+      sonido.src = "Stewie.mp3";
+
+      class Rectangle {
+        constructor(x, y, w, h, c) {
+          this.x = x;
+          this.y = y;
+          this.w = w;
+          this.h = h;
+          this.c = c;
+        }
+        paint(ctx) {
+          ctx.fillStyle = this.c;
+          ctx.fillRect(this.x, this.y, this.w, this.h);
+        }
+
+        seTocan(otro) {
+          if (
+            this.x < otro.x + otro.w &&
+            this.x + this.w > otro.x &&
+            this.y < otro.y + otro.h &&
+            this.y + this.h > otro.y
+          ) {
+            return true;
+          }
+          return false;
+        }
+      }
+      const player = new Rectangle(255, 255, 50, 50, "black");
+      const target = new Rectangle(
+        randomInteger(460),
+        randomInteger(460),
+        50,
+        50,
+        "black"
+      );
+
+      //BACK WALLS
+      walls.push(new Rectangle(0, 0, 4, 180, "BLUE"));
+      walls.push(new Rectangle(0, 300, 4, 210, "BLUE"));
+      walls.push(new Rectangle(496, 0, 4, 180, "BLUE"));
+      walls.push(new Rectangle(496, 300, 4, 210, "BLUE"));
+      walls.push(new Rectangle(1, 0, 499, 4, "BLUE"));
+      walls.push(new Rectangle(1, 496, 499, 4, "BLUE"));
+
+      //
+      walls.push(new Rectangle(0, 180, 40, 4, "BLUE"));
+      walls.push(new Rectangle(40, 180, 4, 20, "BLUE"));
+      walls.push(new Rectangle(0, 200, 44, 4, "BLUE"));
+
+      walls.push(new Rectangle(460, 180, 40, 4, "BLUE"));
+      walls.push(new Rectangle(460, 180, 4, 20, "BLUE"));
+      walls.push(new Rectangle(460, 200, 44, 4, "BLUE"));
+
+      //
+      walls.push(new Rectangle(4, 300, 40, 4, "BLUE"));
+      walls.push(new Rectangle(40, 270, 4, 30, "BLUE"));
+      walls.push(new Rectangle(0, 270, 40, 4, "BLUE"));
+
+      walls.push(new Rectangle(460, 300, 40, 4, "BLUE"));
+      walls.push(new Rectangle(460, 270, 4, 30, "BLUE"));
+      walls.push(new Rectangle(460, 270, 40, 4, "BLUE"));
+
+      //
+
+      walls.push(new Rectangle(250, 0, 4, 40, "BLUE"));
+      walls.push(new Rectangle(70, 70, 30, 30, "BLUE"));
+      walls.push(new Rectangle(150, 70, 30, 30, "BLUE"));
+
+      window.requestAnimationFrame = (function () {
+        return (
+          window.requestAnimationFrame ||
+          window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          function (callback) {
+            window.setTimeout(callback, 17);
+          }
+        );
+      })();
+
+      document.addEventListener("keydown", (e) => {
+        if (e.keyCode == 87) {
+          dir = 1;
+        }
+        if (e.keyCode == 83) {
+          dir = 2;
+        }
+        if (e.keyCode == 68) {
+          dir = 3;
+        }
+        if (e.keyCode == 65) {
+          dir = 4;
+        }
+        if (e.keyCode == 32) {
+          //speed += 5;
+          pause = !pause;
+        }
+      });
+
+      function update() {
+        if (!pause) {
+          if (dir == 1) {
+            player.y -= speed;
+            if (player.y + 50 < 0) {
+              player.y = 550;
+            }
+          }
+
+          if (dir == 2) {
+            player.y += speed;
+            if (player.y + 50 > 500) {
+              player.y = -50;
+            }
+          }
+
+          if (dir == 3) {
+            player.x += speed;
+            if (player.x + 50 > 500) {
+              player.x = -50;
+            }
+          }
+
+          if (dir == 4) {
+            player.x -= speed;
+            if (player.x + 50 < 0) {
+              player.x = 550;
+            }
+          }
+          if (player.seTocan(target)) {
+            target.x = randomInteger(460);
+            target.y = randomInteger(460);
+            score++;
+            sonido.play();
+          }
+
+          for (var i = walls.length - 1; i >= 0; i--) {
+            if (player.seTocan(walls[i])) {
+              if (dir == 1) {
+                player.y += speed;
+              }
+
+              if (dir == 2) {
+                player.y -= speed;
+              }
+
+              if (dir == 3) {
+                player.x -= speed;
+              }
+
+              if (dir == 4) {
+                player.x += speed;
+              }
+              dir = 0;
+            }
+          }
+
+          if (x < tx + 20 && x + 50 > tx && y < ty + 20 && y + 50 > ty) {
+            tx = randomInteger(500);
+            ty = randomInteger(500);
+          }
+
+          // if (x < wx + 250 && x + 50 > wx && y < wy + 20 && y + 50 > wy) {
+          // tx = randomInteger(500);
+          //ty = randomInteger(500);
+          // }
+        } //this one for pause~~~~~~~~~~~~~~~~~~~
+        paint();
+        window.requestAnimationFrame(update);
+      }
+
+      function paint() {
+        ctx.fillStyle = "#D3F4F1";
+        ctx.fillRect(0, 0, 500, 500);
+
+        ctx.font = "27px Georgia";
+        ctx.fillStyle = "black";
+        ctx.fillText("Score: " + score, 3, 22);
+
+        player.c = randomRgbColor();
+        // player.paint(ctx);
+        ctx.drawImage(image, player.x, player.y, 50, 50);
+        //target.paint(ctx);
+        ctx.drawImage(image2, target.x, target.y, 50, 50);
+
+        for (let i = walls.length - 1; i >= 0; i--) {
+          walls[i].paint(ctx);
+        }
+
+        if (pause) {
+          ctx.font = "40px Georgia";
+          ctx.fillStyle = "black";
+          ctx.fillText("P A U S E", 185, 225);
+        }
+
+        // ctx.fillStyle = randomRgbColor();
+        // ctx.fillRect(x, y, 50, 50);
+
+        // ctx.fillStyle = "black";
+        // ctx.fillRect(tx, ty, 50, 50);
+
+        // ctx.fillStyle = "gray";
+        // ctx.fillRect(wx, wy, 250, 20);
+      }
+
+      update();
+
+      function randomRgbColor() {
+        let r = randomInteger(255);
+        let g = randomInteger(255);
+        let b = randomInteger(255);
+        return "rgba(" + r + "," + g + "," + b + ",0.5)";
+      }
+
+      function randomInteger(max) {
+        return Math.floor(Math.random() * (max + 1));
+      }
+
+      function play() {
+        console.log("hello");
+        //  window.requestAnimationFrame(update);
+      }
+      //play();
+    </script>
+  </body>
+</html>
