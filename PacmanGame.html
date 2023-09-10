@@ -30,6 +30,8 @@
       var wy = 200;
       let score = 0;
       let walls = [];
+      let dots = [];
+
       let pause = false;
       let image = new Image();
       let image2 = new Image();
@@ -64,8 +66,9 @@
           return false;
         }
       }
-      const player = new Rectangle(255, 255, 50, 50, "black");
-      const target = new Rectangle(
+
+      var player = new Rectangle(255, 255, 50, 50, "black");
+      var beer = new Rectangle(
         randomInteger(460),
         randomInteger(460),
         50,
@@ -151,6 +154,43 @@
         );
       })();
 
+      // amount of dots
+
+      function calculateDotPositions() {
+        let dotRadius = 4;
+        let minDistanceToWall = 20;
+
+        for (
+          let dotX = dotRadius;
+          dotX < canvas.width - dotRadius;
+          dotX += 2 * dotRadius
+        ) {
+          for (
+            let dotY = dotRadius;
+            dotY < canvas.height - dotRadius;
+            dotY += 2 * dotRadius
+          ) {
+            let isCloseToWall = walls.some((wall) => {
+              return (
+                dotX + dotRadius + minDistanceToWall >= wall.x &&
+                dotX - dotRadius - minDistanceToWall <= wall.x + wall.w &&
+                dotY + dotRadius + minDistanceToWall >= wall.y &&
+                dotY - dotRadius - minDistanceToWall <= wall.y + wall.h
+              );
+            });
+
+            if (!isCloseToWall) {
+              dots.push({ x: dotX, y: dotY });
+            }
+          }
+        }
+      }
+
+      calculateDotPositions();
+
+      beer.x = randomInteger(canvas.width - beer.w);
+      beer.y = randomInteger(canvas.height - beer.h);
+
       document.addEventListener("keydown", (e) => {
         if (e.keyCode == 87) {
           dir = 1;
@@ -199,12 +239,25 @@
               player.x = 550;
             }
           }
-          if (player.seTocan(target)) {
-            target.x = randomInteger(460);
-            target.y = randomInteger(460);
-            score++;
-            sonido.play();
+
+          beer.x += ghostSpeed;
+          if (beer.x > canvas.width) {
+            beer.x = -beer.w;
+            beer.y = randomInteger(canvas.height - beer.h);
           }
+
+          // Check if the beer (ghost) hits the player (Peter)
+          if (player.seTocan(beer)) {
+            endGame();
+            return;
+          }
+
+          //   if (player.seTocan(target)) {
+          //     target.x = randomInteger(460);
+          //     target.y = randomInteger(460);
+          //     score++;
+          //     sonido.play();
+          //   }
 
           for (var i = walls.length - 1; i >= 0; i--) {
             if (player.seTocan(walls[i])) {
@@ -232,6 +285,24 @@
             ty = randomInteger(500);
           }
 
+          // Check if the player hits a dot
+          for (let i = 0; i < dots.length; i++) {
+            let dot = dots[i];
+            let dotRadius = 10; // Adjust the dot size as needed
+            let playerCenterX = player.x + player.w / 2;
+            let playerCenterY = player.y + player.h / 2;
+            let distance = Math.sqrt(
+              Math.pow(dot.x - playerCenterX, 2) +
+                Math.pow(dot.y - playerCenterY, 2)
+            );
+
+            if (distance < player.w / 2 + dotRadius) {
+              dots.splice(i, 1); // Remove the collected dot
+              score++;
+              sonido.play();
+            }
+          }
+
           // if (x < wx + 250 && x + 50 > wx && y < wy + 20 && y + 50 > wy) {
           // tx = randomInteger(500);
           //ty = randomInteger(500);
@@ -239,6 +310,14 @@
         } //this one for pause~~~~~~~~~~~~~~~~~~~
         paint();
         window.requestAnimationFrame(update);
+      }
+
+      function endGame() {
+        ctx.font = "40px Georgia";
+        ctx.fillStyle = "red";
+        ctx.fillText("Game Over", 170, 225);
+        pause = true;
+        clearInterval(gameLoop);
       }
 
       function paint() {
@@ -253,7 +332,8 @@
         // player.paint(ctx);
         ctx.drawImage(image, player.x, player.y, 50, 50);
         //target.paint(ctx);
-        ctx.drawImage(image2, target.x, target.y, 50, 50);
+        //ctx.drawImage(image2, target.x, target.y, 50, 50);
+        ctx.drawImage(image2, beer.x, beer.y, 50, 50);
 
         for (let i = walls.length - 1; i >= 0; i--) {
           walls[i].paint(ctx);
@@ -265,15 +345,28 @@
           ctx.fillText("P A U S E", 185, 225);
         }
 
-        // ctx.fillStyle = randomRgbColor();
-        // ctx.fillRect(x, y, 50, 50);
+        ctx.fillStyle = "yellow"; // Dot color
+        for (let i = 0; i < dots.length; i++) {
+          ctx.beginPath();
+          ctx.arc(dots[i].x, dots[i].y, 10, 0, 2 * Math.PI);
+          ctx.fill();
+        }
 
-        // ctx.fillStyle = "black";
-        // ctx.fillRect(tx, ty, 50, 50);
-
-        // ctx.fillStyle = "gray";
-        // ctx.fillRect(wx, wy, 250, 20);
+        // // ...
       }
+
+      // ctx.fillStyle = randomRgbColor();
+      // ctx.fillRect(x, y, 50, 50);
+
+      // ctx.fillStyle = "black";
+      // ctx.fillRect(tx, ty, 50, 50);
+
+      // ctx.fillStyle = "gray";
+      // ctx.fillRect(wx, wy, 250, 20);
+      var ghostSpeed = 2;
+
+      beer.x = randomInteger(canvas.width - beer.w);
+      beer.y = randomInteger(canvas.height - beer.h);
 
       update();
 
