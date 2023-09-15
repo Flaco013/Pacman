@@ -31,15 +31,19 @@
       let score = 0;
       let walls = [];
       let dots = [];
+      let totalDots = dots.length;
+      let gameOver = false;
 
       let pause = false;
       let image = new Image();
       let image2 = new Image();
       let sonido = new Audio();
+      let sonido2 = new Audio();
 
       image.src = "peter.png";
       image2.src = "BeerBottle.png";
       sonido.src = "Stewie.mp3";
+      sonido2.src = "Family_guy_song.mp3";
 
       class Rectangle {
         constructor(x, y, w, h, c) {
@@ -159,6 +163,7 @@
       function calculateDotPositions() {
         let dotRadius = 4;
         let minDistanceToWall = 20;
+        dots = [];
 
         for (
           let dotX = dotRadius;
@@ -184,6 +189,7 @@
             }
           }
         }
+        totalDots = dots.length;
       }
 
       calculateDotPositions();
@@ -211,7 +217,7 @@
       });
 
       function update() {
-        if (!pause) {
+        if (!pause && !gameOver) {
           if (dir == 1) {
             player.y -= speed;
             if (player.y + 50 < 0) {
@@ -238,6 +244,7 @@
             if (player.x + 50 < 0) {
               player.x = 550;
             }
+            sonido2.play();
           }
 
           beer.x += ghostSpeed;
@@ -249,6 +256,7 @@
           // Check if the beer (ghost) hits the player (Peter)
           if (player.seTocan(beer)) {
             endGame();
+            sonido2.pause();
             return;
           }
 
@@ -299,8 +307,12 @@
             if (distance < player.w / 2 + dotRadius) {
               dots.splice(i, 1); // Remove the collected dot
               score++;
-              sonido.play();
+              //sonido.play();
             }
+          }
+
+          if (score === totalDots) {
+            winGame();
           }
 
           // if (x < wx + 250 && x + 50 > wx && y < wy + 20 && y + 50 > wy) {
@@ -317,7 +329,16 @@
         ctx.fillStyle = "red";
         ctx.fillText("Game Over", 170, 225);
         pause = true;
-        clearInterval(gameLoop);
+        //clearInterval(gameLoop);
+        sonido2.pause();
+      }
+
+      function winGame() {
+        ctx.font = "40px Georgia";
+        ctx.fillStyle = "green";
+        ctx.fillText("You Won!", 185, 225);
+        gameOver = true;
+        sonido2.pause();
       }
 
       function paint() {
@@ -339,10 +360,19 @@
           walls[i].paint(ctx);
         }
 
+        if (gameOver) {
+          ctx.font = "40px Georgia";
+          ctx.fillStyle = "green";
+          ctx.fillText("You Won!", 185, 225);
+          gameOver = true;
+          sonido2.pause();
+        }
+
         if (pause) {
           ctx.font = "40px Georgia";
           ctx.fillStyle = "black";
           ctx.fillText("P A U S E", 185, 225);
+          sonido2.pause();
         }
 
         ctx.fillStyle = "yellow"; // Dot color
