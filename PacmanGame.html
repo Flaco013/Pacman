@@ -6,6 +6,45 @@
     <title>Document</title>
   </head>
   <body>
+    <div id="timer" class="timer">Time: 0 seconds</div>
+
+    <button
+      id="playAgainButton"
+      onclick="playAgain()"
+      class="play-again-button"
+    >
+      Play Again
+    </button>
+
+    <style>
+      .play-again-button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+      }
+
+      .play-again-button:hover {
+        background-color: #45a049;
+      }
+
+      #playAgainButton {
+        position: absolute;
+        top: 10px;
+        left: 530px;
+      }
+      .timer {
+        position: absolute;
+        top: 60px;
+        left: 550px;
+        color: #333;
+        font-size: 16px;
+      }
+    </style>
+
     <canvas
       id="myCanvas"
       width="500px"
@@ -14,6 +53,29 @@
     ></canvas>
 
     <script>
+      var startTime = null;
+      var elapsedTime = 0;
+      var timerInterval;
+
+      function startTimer() {
+        startTime = Date.now() - elapsedTime;
+        timerInterval = setInterval(updateTimer, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function updateTimer() {
+        var currentTime = Date.now();
+        elapsedTime = currentTime - startTime;
+        var seconds = Math.floor(elapsedTime / 1000);
+        document.getElementById("timer").textContent =
+          "Time: " + seconds + " seconds";
+      }
+
+      startTimer();
+
       var canvas = document.getElementById("myCanvas");
       var ctx = canvas.getContext("2d");
 
@@ -37,11 +99,13 @@
       let pause = false;
       let image = new Image();
       let image2 = new Image();
+      let image3 = new Image();
       let sonido = new Audio();
       let sonido2 = new Audio();
 
       image.src = "peter.png";
       image2.src = "BeerBottle.png";
+      image3.src = "BeerBottle.png";
       sonido.src = "Stewie.mp3";
       sonido2.src = "Family_guy_song.mp3";
 
@@ -73,6 +137,13 @@
 
       var player = new Rectangle(255, 255, 50, 50, "black");
       var beer = new Rectangle(
+        randomInteger(460),
+        randomInteger(460),
+        50,
+        50,
+        "black"
+      );
+      var beer2 = new Rectangle(
         randomInteger(460),
         randomInteger(460),
         50,
@@ -197,6 +268,9 @@
       beer.x = randomInteger(canvas.width - beer.w);
       beer.y = randomInteger(canvas.height - beer.h);
 
+      beer2.x = randomInteger(canvas.width - beer2.w);
+      beer2.y = randomInteger(canvas.height - beer2.h);
+
       document.addEventListener("keydown", (e) => {
         if (e.keyCode == 87) {
           dir = 1;
@@ -248,24 +322,23 @@
           }
 
           beer.x += ghostSpeed;
+          beer2.x += ghostSpeed;
           if (beer.x > canvas.width) {
             beer.x = -beer.w;
             beer.y = randomInteger(canvas.height - beer.h);
           }
+          if (beer2.x > canvas.width) {
+            beer2.x = -beer.w;
+            beer2.y = randomInteger(canvas.height - beer2.h);
+          }
 
           // Check if the beer (ghost) hits the player (Peter)
-          if (player.seTocan(beer)) {
+          if (player.seTocan(beer) || player.seTocan(beer2)) {
             endGame();
+            sonido.play();
             sonido2.pause();
             return;
           }
-
-          //   if (player.seTocan(target)) {
-          //     target.x = randomInteger(460);
-          //     target.y = randomInteger(460);
-          //     score++;
-          //     sonido.play();
-          //   }
 
           for (var i = walls.length - 1; i >= 0; i--) {
             if (player.seTocan(walls[i])) {
@@ -293,7 +366,7 @@
             ty = randomInteger(500);
           }
 
-          // Check if the player hits a dot
+          // Check player hits a dot
           for (let i = 0; i < dots.length; i++) {
             let dot = dots[i];
             let dotRadius = 10; // Adjust the dot size as needed
@@ -305,7 +378,7 @@
             );
 
             if (distance < player.w / 2 + dotRadius) {
-              dots.splice(i, 1); // Remove the collected dot
+              dots.splice(i, 1);
               score++;
               //sonido.play();
             }
@@ -314,12 +387,7 @@
           if (score === totalDots) {
             winGame();
           }
-
-          // if (x < wx + 250 && x + 50 > wx && y < wy + 20 && y + 50 > wy) {
-          // tx = randomInteger(500);
-          //ty = randomInteger(500);
-          // }
-        } //this one for pause~~~~~~~~~~~~~~~~~~~
+        }
         paint();
         window.requestAnimationFrame(update);
       }
@@ -331,6 +399,7 @@
         pause = true;
         //clearInterval(gameLoop);
         sonido2.pause();
+        sonido.play();
       }
 
       function winGame() {
@@ -355,6 +424,7 @@
         //target.paint(ctx);
         //ctx.drawImage(image2, target.x, target.y, 50, 50);
         ctx.drawImage(image2, beer.x, beer.y, 50, 50);
+        ctx.drawImage(image3, beer2.x, beer2.y, 50, 50);
 
         for (let i = walls.length - 1; i >= 0; i--) {
           walls[i].paint(ctx);
@@ -381,18 +451,8 @@
           ctx.arc(dots[i].x, dots[i].y, 10, 0, 2 * Math.PI);
           ctx.fill();
         }
-
-        // // ...
       }
 
-      // ctx.fillStyle = randomRgbColor();
-      // ctx.fillRect(x, y, 50, 50);
-
-      // ctx.fillStyle = "black";
-      // ctx.fillRect(tx, ty, 50, 50);
-
-      // ctx.fillStyle = "gray";
-      // ctx.fillRect(wx, wy, 250, 20);
       var ghostSpeed = 2;
 
       beer.x = randomInteger(canvas.width - beer.w);
@@ -411,11 +471,29 @@
         return Math.floor(Math.random() * (max + 1));
       }
 
-      function play() {
-        console.log("hello");
-        //  window.requestAnimationFrame(update);
+      function playAgain() {
+        player.x = 255;
+        player.y = 255;
+        dir = 0;
+        speed = 5;
+        score = 0;
+        gameOver = false;
+
+        // Reset beer positions
+        beer.x = randomInteger(canvas.width - beer.w);
+        beer.y = randomInteger(canvas.height - beer.h);
+        beer2.x = randomInteger(canvas.width - beer2.w);
+        beer2.y = randomInteger(canvas.height - beer2.h);
+
+        stopTimer();
+        elapsedTime = 0;
+        startTimer();
+
+        calculateDotPositions();
+
+        pause = false;
+        update();
       }
-      //play();
     </script>
   </body>
 </html>
